@@ -1,0 +1,279 @@
+using System.Media;
+using System;
+using System.Collections.Generic;
+using System.IO;
+
+
+
+
+
+namespace Cy_Bot_Solutions
+
+
+{
+    class Program
+    {
+        // Variables to store user details
+        static string? userName = "User";
+        static string? interestTopic = null;
+
+        // Keywords Dictionary
+        static readonly Dictionary<string, string> sentimentResponses = new Dictionary<string, string>
+        {
+            {"worried", "Its completely understandable to feel that way. Lets go through some helpful tips together." },
+            {"curious", "Curiosity shows the intent to want to learn. What would you like to be enlighened with. " },
+            {"enfuriated", "Its natural to be angry when struggling to grasp things. I'm here to offer any needed assistance." }
+        };
+
+        static void Main(string[] args)
+        {
+
+
+            // play audio greeting
+            PlayAudioGreeting("Cy-BotSolutionsAudio.wav");   // Code to play audio greeting when app starts up
+            DisplayAsciiArt();                               // Code to display ASCII Logo when app starts up 
+
+
+            Console.Title = "Cyber Awareness Chatbot";    // This sets the title of the console window
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("Welcome to your Cyber security awareness chatbot!");
+            Console.WriteLine("Whats your name?");
+            Console.ForegroundColor = ConsoleColor.White;
+
+            string? usernameInput = Console.ReadLine();                                          // Creating the user as well as accepting and handling  
+            userName = string.IsNullOrWhiteSpace(usernameInput) ? "User" : usernameInput; // their input, along with any input that they dont
+                                                                                          // any inout spaces that they leave blank
+
+
+            Console.WriteLine("Hi there " + userName + " lets, have a safer experience online together. I am at your service.");  // This greets the user according to their created username
+
+            Console.WriteLine("You can acquire assistance on identifying a cyber attack, gaining tips for hacking control " + // This gives the user an idea of how to use 
+                              ", general online safety practices or type 'exit' to quit.\n");  //  the app, or they can exit if not interested
+            while (true)
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.Write(userName + " : ");
+                string? input = Console.ReadLine()?.ToLower().Trim();
+
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkCyan;
+                    Console.WriteLine("Chatbot: I'm not sure I understand. Can you please rephrase your input? ");
+                    continue;
+                }
+
+                if (input == "exit")
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                    Console.WriteLine("Chatbot: A skill a-day keeps the threats away!");
+                    break;
+                }
+                if (!DetectSentiment(input))
+                {
+                    if (!RecogniseKeywords(input))
+                    {
+                        HandleUserQuery(input, userName);
+                    }
+                }
+            }
+
+        }
+
+        // Define sentimnent detection inside Main
+        static bool DetectSentiment(string input)
+        {
+            foreach (var sentiment in sentimentResponses)
+            {
+                if (input.Contains(sentiment.Key))
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Chatbot: " + sentiment.Value);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        static void PlayAudioGreeting(string filename) // Enables the program to play the audio greeting from its saved location
+        {
+            try
+            {
+                string fullpath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("Looking for audio at: " + fullpath);
+                if(File.Exists(fullpath))//This checks and ensures that the greeting is in its specified path
+                {
+                    SoundPlayer player = new SoundPlayer(fullpath);
+                    player.PlaySync(); // play sound synchronously 
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Gray;      // This notifies the user if the audio isnt found in its specified location
+                    Console.WriteLine("Audio file not found at path: " + fullpath);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray; // Showing a message if audio was not found
+                Console.WriteLine("Unable to play audio file: " + ex.Message);
+            }
+        }
+
+        static void DisplayAsciiArt()   // This displays the ASCII Logo, in the specified color 
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("                                                     Welcome to");
+            Console.WriteLine(@"   
+
+ ________       ___    ___               ________   ________   _________                            
+|\   ____\     |\  \  /  /|             |\   __  \ |\   __  \ |\___   ___\                          
+\ \  \___|     \ \  \/  / /____________ \ \  \|\ /_\ \  \|\  \\|___ \  \_|                          
+ \ \  \         \ \    / /|\____________\\ \   __  \\ \  \\\  \    \ \  \                           
+  \ \  \____     \/  /  / \|____________| \ \  \|\  \\ \  \\\  \    \ \  \                          
+   \ \_______\ __/  / /                    \ \_______\\ \_______\    \ \__\                         
+    \|_______||\___/ /                      \|_______| \|_______|     \|__|                         
+              \|___|/                                                                               
+ ________   ________   ___        ___  ___   _________   ___   ________   ________    ________      
+|\   ____\ |\   __  \ |\  \      |\  \|\  \ |\___   ___\|\  \ |\   __  \ |\   ___  \ |\   ____\     
+\ \  \___|_\ \  \|\  \\ \  \     \ \  \\\  \\|___ \  \_|\ \  \\ \  \|\  \\ \  \\ \  \\ \  \___|_    
+ \ \_____  \\ \  \\\  \\ \  \     \ \  \\\  \    \ \  \  \ \  \\ \  \\\  \\ \  \\ \  \\ \_____  \   
+  \|____|\  \\ \  \\\  \\ \  \____ \ \  \\\  \    \ \  \  \ \  \\ \  \\\  \\ \  \\ \  \\|____|\  \  
+    ____\_\  \\ \_______\\ \_______\\ \_______\    \ \__\  \ \__\\ \_______\\ \__\\ \__\ ____\_\  \ 
+   |\_________\\|_______| \|_______| \|_______|     \|__|   \|__| \|_______| \|__| \|__||\_________\
+   \|_________|                                                                         \|_________|
+
+");
+
+            Console.WriteLine("                                            The Bot Dedicated to keeping you safe online!");
+            Console.ResetColor();
+
+        }
+        static bool RecogniseKeywords(string input)
+        {
+            if (input.Contains("password"))
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Chatbot: Make sure to use strong unique passwords for each account. Avoid using personal details.");
+                return true;
+            }
+            else if (input.Contains("scam") || input.Contains("phishing"))
+            {
+                string[] tips =
+                {
+                    "Be careful of emails asking for personal information. Scammers pretend to be trusted services.",
+                    "Refrain from clicking onto suspicios links.",
+                    "Always verify the sender's email address before replying."
+                };
+                Random rand = new Random();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("Chatbot: " + tips[rand.Next(tips.Length)]);
+                return true;
+            }
+            else if (input.Contains("privacy"))
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine("Chatbot: Awesome! Your interest in privacy will be recorded and saved. Privacy is essential in security online");
+                interestTopic = "privacy";
+                return true;
+            }
+            else if (input.Contains("malware") || input.Contains("virus") || input.Contains("worm"))
+            {
+                SuggestSafetySkill();
+                return true;
+            }
+                return false;
+
+        }
+
+        // This makes sure that the input of the user corresponds to the options and responses of the program
+        static void HandleUserQuery(string userInput, string username)
+        {
+            Dictionary<string, string> responses = new Dictionary<string, string> // Stores and avails the options and responses of the program 
+            {
+                {
+                    "help",
+                    "The guidance available is about: 'Identifying a cyber attack', 'What to do when you are hacked','Examples of traps set by hackers online'," +
+                "'General online saftey practices and tips'."
+                },
+                {"Identifying a Cyber attack", "Common Signs of this are, your device being slower than usual, seeng strange pop-ups," +
+                "as well as apps that you dont recall installing or downloading." },
+
+                {"Tips for hacking control", "Disconnect your device from the internet, change your password, use 2 factor authentication " +
+                "as a means of signing into your account, and keep an eye on your accounts to ensure there isnt any" +
+                "activity by someone else on your account"},
+
+                {"General online saftey practices", "Ensuring that you have the latest software installed on your device for the most up-to-date" +
+                "security on your device; Installing an antivirus, to identify and dispose of any threats on your device; using a VPN" +
+                "on your device to hide your IP address from potential hackers tryng to hack your device and access your data. " +
+                "There are other various ways of staying safe online"},
+
+
+            };
+            // for matching to be done efficiently, the code is converted to lowercase
+            // despite howver the user typed their input message 
+            string normalizedInput = userInput.ToLowerInvariant();
+
+            // Flag to detect match for user input in the options available 
+            bool matched = false;
+
+            foreach (var pair in responses)
+            {
+                if (normalizedInput.Contains(pair.Key))
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("Chatbot: " + pair.Value);
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched)
+            {
+                if (interestTopic != null && (normalizedInput.Contains("more") || normalizedInput.Contains("details")))
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine($"As someone interested in {interestTopic}, you might want to review your account privacy settings and enable 2FA.");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                    Console.WriteLine("Chatbot: I'm not sure I understand. Can you please rephrase your input?");
+                }
+            }
+        }
+        public static void SuggestSafetySkill()  // Containing different tips for different types of malware 
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Chatbot: Which type of malware would you like help with protecting yourself from? (malicious cookie, virus, worm?)");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            string? malware = Console.ReadLine();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            if (malware == "malicious cookie")
+            {
+                Console.WriteLine("Recommend Session Hijacking Solution: \n Clear all cookies and cache, log out of all accounts and change all passwords");
+            }
+
+            else if (malware == "virus")
+            {
+                Console.WriteLine("Recommend Virus Solution: \n Instal an antivirus app, run a full scan, and remove the corrupted files");
+            }
+
+            else if (malware == "worm")
+            {
+                Console.WriteLine("Recommend Virus Solution: \n Disconnect the infected system from the internet," +
+                                  "and also from your devices storage,and proceed to delete suspicious files");
+
+            }
+
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Chatbot: Malware not recognized. Malware options are 'Session Hijacking Solution', 'A Virus', 'A Worm'");
+            }
+        }
+    }
+}
+
+
